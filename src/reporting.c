@@ -1702,7 +1702,11 @@ static int process_ek_card(context_t *ctx, const card_t *card, card_state_t *sta
 {
     if (!ctx || !card || !state) return -1;
     
-    state->use_extended_kernel = card->i[1];  /* iexk - Extended kernel flag */
+    /* NEC-2: a bare EK (I1 blank/0) turns the extended thin-wire kernel ON
+     * and EK -1 turns it OFF; fields.c tests the flag with == 1, so store the
+     * canonical 0/1 rather than the raw I1.  Same rule as the deprecated
+     * batch path in control.c (issue #37). */
+    state->use_extended_kernel = (card->i[1] == -1) ? 0 : 1;  /* iexk */
     
     return 0;
 }
